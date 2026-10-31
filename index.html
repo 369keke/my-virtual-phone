@@ -119,10 +119,90 @@
     height: 49px;
   }
 }
+  /* 锁屏界面 */
+.lock-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 18vh;
+  color: white;
+  background: linear-gradient(160deg, #64748b, #1e293b 65%, #0f172a);
+}
+
+.lock-time {
+  font-size: 76px;
+  font-weight: 300;
+  letter-spacing: 2px;
+}
+
+.lock-date {
+  margin-top: 8px;
+  font-size: 17px;
+}
+
+.lock-box {
+  width: 78%;
+  margin-top: 100px;
+  text-align: center;
+}
+
+.lock-box p {
+  font-size: 15px;
+}
+
+.lock-box input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 48px;
+  margin: 15px 0;
+  border: 1px solid rgba(255,255,255,.5);
+  border-radius: 14px;
+  background: rgba(255,255,255,.15);
+  color: white;
+  text-align: center;
+  font-size: 22px;
+  letter-spacing: 8px;
+  outline: none;
+}
+
+.lock-box button {
+  width: 100%;
+  height: 46px;
+  border: none;
+  border-radius: 14px;
+  background: white;
+  color: #263449;
+  font-size: 16px;
+}
+
+#lockError {
+  color: #ffd2d2;
+  min-height: 20px;
+}
     </style>
     </head>
     <body>
     <main class="phone" id="phone">
+      <section id="lockScreen" class="lock-screen">
+  <div class="lock-time" id="lockTime">00:00</div>
+  <div class="lock-date" id="lockDate">11月1日 星期日</div>
+
+  <div class="lock-box">
+    <p>请输入锁屏密码</p>
+    <input
+      id="lockPassword"
+      type="password"
+      inputmode="numeric"
+      maxlength="4"
+      placeholder="输入4位密码"
+    >
+    <button onclick="unlockPhone()">解锁</button>
+    <p id="lockError"></p>
+  </div>
+      </section>
       <div class="status">
           <div class="status-left"><span id="statusTime">09:41</span><span>◔</span></div>
               <div class="status-right"><span class="signal"><i></i><i></i><i></i><i></i></span><span class="wifi"><b></b></span><span class="battery"><span></span></span><span>98</span></div>
