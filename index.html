@@ -66,6 +66,59 @@
     .game-new{border:0;border-radius:13px;background:#347fe0;color:white;padding:10px 12px;font-size:13px;white-space:nowrap}
 
     @media(min-width:600px){.phone{height:min(92dvh,900px);border-radius:38px;border:8px solid #20232a;box-shadow:0 18px 70px #0008}.island{top:12px}}
+  /* 手机屏幕适配 */
+@media (max-width: 600px) {
+  .phone {
+    width: 100vw;
+    height: 100dvh;
+    max-height: none;
+    min-height: 0;
+    border-radius: 0;
+    border: none;
+  }
+
+  .content {
+    height: calc(100% - 52px);
+    padding: 12px 16px 12px;
+  }
+
+  .clock {
+    font-size: 58px;
+    margin-top: 4px;
+  }
+
+  .weather {
+    margin-top: 14px;
+    height: 110px;
+    padding: 13px 18px;
+  }
+
+  .page-grid {
+    margin-top: 16px;
+    row-gap: 13px;
+    column-gap: 5px;
+  }
+
+  .icon {
+    width: clamp(48px, 15vw, 65px);
+    height: clamp(48px, 15vw, 65px);
+    border-radius: 17px;
+  }
+
+  .app-name {
+    font-size: 11px;
+  }
+
+  .dock {
+    height: 70px;
+    margin-bottom: 8px;
+  }
+
+  .dock .icon {
+    width: 49px;
+    height: 49px;
+  }
+}
     </style>
     </head>
     <body>
