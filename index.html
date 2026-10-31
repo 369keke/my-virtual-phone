@@ -434,16 +434,170 @@
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     $('trackName').textContent=file.name.replace(/\.[^.]+$/,'');
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           $('trackInfo').textContent='已载入本地音频';
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 $('audioPlayer').src=URL.createObjectURL(file);$('audioPlayer').play().catch(()=>{});
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    };
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      }else if(name==='微信'||name==='QQ'||name==='消息'){
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          const chatName=name==='微信'?'文件传输助手':name==='QQ'?'我的好友':'信息演示';
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              body.innerHTML=`<div class="panel"><strong>${name} · 模拟聊天</strong><p class="muted">这里是演示界面，消息只保存在当前页面，不会发送到真实账号。</p></div><div class="chat-row"><div class="chat-avatar">${name==='QQ'?'🐧':'💬'}</div><div><strong>${chatName}</strong><div class="muted">点击下方输入框发送一条消息</div></div></div><div class="chatlog" id="chatLog"><div class="bubble" style="align-self:flex-start;background:#fff;color:#222">你好！欢迎来到${name}。</div></div><div class="chat-input"><input id="chatInput" placeholder="输入消息……"><button class="action" id="sendBtn">发送</button></div>`;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  const send=()=>{
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        const value=$('chatInput').value.trim();if(!value)return;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              const bubble=document.createElement('div');bubble.className='bubble';bubble.textContent=value;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    $('chatLog').appendChild(bubble);$('chatInput').value='';$('chatLog').scrollTop=$('chatLog').scrollHeight;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        };
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            $('sendBtn').onclick=send;$('chatInput').addEventListener('keydown',event=>{if(event.key==='Enter')send()});
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    };}else if(name==='微信'){
+  const key='myWechatData';
+  let data=JSON.parse(localStorage.getItem(key)||'null')||{
+    contacts:[
+      {id:1,name:'文件传输助手',avatar:'📁',messages:[
+        {id:1,mine:false,text:'你好！欢迎使用模拟微信。',time:'09:30'}
+      ]}
+    ]
+  };
+  let current=null;
+  let screenshot=false;
+
+  const save=()=>localStorage.setItem(key,JSON.stringify(data));
+  const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  function showList(){
+    current=null;
+    body.innerHTML=`
+      <div class="wx-page">
+        <div class="wx-toolbar">
+          <strong style="flex:1;padding:8px">微信</strong>
+          <button id="addWx">＋ 添加联系人</button>
+        </div>
+        <div class="wx-list">
+          ${data.contacts.map(c=>`
+            <button class="wx-contact" data-id="${c.id}">
+              <div class="wx-avatar" style="display:grid;place-items:center;font-size:28px">${esc(c.avatar||'🙂')}</div>
+              <div><strong>${esc(c.name)}</strong><div style="color:#999;font-size:12px">点击进入聊天</div></div>
+            </button>`).join('')}
+          ${data.contacts.length?'':'<div class="wx-empty">还没有联系人，点击右上角添加</div>'}
+        </div>
+      </div>`;
+
+    body.querySelector('#addWx').onclick=()=>{
+      const n=prompt('请输入联系人昵称');
+      if(!n||!n.trim())return;
+      const a=prompt('请输入头像表情，例如 🌸、🐱、🙂','🙂')||'🙂';
+      data.contacts.push({id:Date.now(),name:n.trim(),avatar:a,messages:[]});
+      save();showList();
+    };
+
+    body.querySelectorAll('[data-id]').forEach(b=>{
+      b.onclick=()=>showChat(Number(b.dataset.id));
+    });
+  }
+
+  function showChat(id){
+    current=id;
+    const c=data.contacts.find(x=>x.id===id);
+    if(!c)return showList();
+
+    body.innerHTML=`
+      <div class="wx-page">
+        <div class="wx-chat">
+          <div class="wx-chat-head">
+            <button id="backWx">‹</button>
+            <strong style="flex:1">${esc(c.name)}</strong>
+            <button id="editWx">编辑联系人</button>
+            <button id="shotWx">截图模式</button>
+          </div>
+          <div class="wx-messages" id="wxMessages">
+            ${c.messages.map(m=>`
+              <div class="wx-message ${m.mine?'mine':''}">
+                <div class="wx-bubble">
+                  ${m.image?`<img src="${m.image}" style="max-width:180px;border-radius:8px">`:esc(m.text||'')}
+                  <div style="font-size:10px;color:#888;margin-top:5px">${esc(m.time||'')}</div>
+                  <div style="font-size:11px;margin-top:5px">
+                    <button data-edit="${m.id}">编辑</button>
+                    <button data-del="${m.id}">删除</button>
+                  </div>
+                </div>
+              </div>`).join('')}
+          </div>
+          <div class="wx-input-area">
+            <button id="sideWx">切换发送方</button>
+            <input id="wxInput" placeholder="输入消息……">
+            <button id="sendWx">发送</button>
+            <button id="imageWx">图片</button>
+            <input id="wxFile" type="file" accept="image/*" hidden>
+          </div>
+        </div>
+      </div>`;
+
+    const messages=body.querySelector('#wxMessages');
+    messages.scrollTop=messages.scrollHeight;
+
+    body.querySelector('#backWx').onclick=showList;
+
+    body.querySelector('#editWx').onclick=()=>{
+      const n=prompt('修改联系人昵称',c.name);
+      if(n&&n.trim())c.name=n.trim();
+      const a=prompt('修改头像表情',c.avatar||'🙂');
+      if(a)c.avatar=a;
+      save();showChat(id);
+    };
+
+    body.querySelector('#shotWx').onclick=()=>{
+      screenshot=!screenshot;
+      body.querySelectorAll('.wx-message button').forEach(b=>{
+        b.style.display=screenshot?'none':'';
+      });
+      body.querySelector('.wx-input-area').style.display=screenshot?'none':'flex';
+    };
+
+    let mine=true;
+    body.querySelector('#sideWx').onclick=()=>{
+      mine=!mine;
+      body.querySelector('#sideWx').textContent=mine?'自己发送':'对方发送';
+    };
+
+    function addMessage(text,image=''){
+      if(!text&&!image)return;
+      c.messages.push({
+        id:Date.now()+Math.random(),
+        mine,text,image,
+        time:new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})
+      });
+      save();showChat(id);
+    }
+
+    body.querySelector('#sendWx').onclick=()=>{
+      addMessage(body.querySelector('#wxInput').value.trim());
+    };
+
+    body.querySelector('#wxInput').onkeydown=e=>{
+      if(e.key==='Enter')body.querySelector('#sendWx').click();
+    };
+
+    body.querySelector('#imageWx').onclick=()=>body.querySelector('#wxFile').click();
+
+    body.querySelector('#wxFile').onchange=e=>{
+      const file=e.target.files[0];
+      if(!file)return;
+      const reader=new FileReader();
+      reader.onload=()=>addMessage('',reader.result);
+      reader.readAsDataURL(file);
+    };
+
+    body.querySelectorAll('[data-edit]').forEach(b=>{
+      b.onclick=()=>{
+        const m=c.messages.find(x=>String(x.id)===b.dataset.edit);
+        if(!m)return;
+        const t=prompt('修改消息内容',m.text||'');
+        if(t===null)return;
+        m.text=t;
+        const time=prompt('修改消息时间（例如 09:30）',m.time||'');
+        if(time!==null)m.time=time;
+        save();showChat(id);
+      };
+    });
+
+    body.querySelectorAll('[data-del]').forEach(b=>{
+      b.onclick=()=>{
+        if(!confirm('确定删除这条消息吗？'))return;
+        c.messages=c.messages.filter(x=>String(x.id)!==b.dataset.del);
+        save();showChat(id);
+      };
+    });
+  }
+
+  showList();
+
+}else if(name==='QQ'||name==='消息'){
+  body.innerHTML=`<div class="panel"><strong>${name} · 模拟聊天</strong><p class="muted">这里是演示界面。</p></div>`;
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               }else if(name==='日历'){
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   const now=new Date();body.innerHTML=`<div class="panel"><h2>${now.getFullYear()}年${now.getMonth()+1}月</h2><p>今天是 ${now.getDate()} 日</p><p class="muted">把重要的日子记在这里吧。</p></div>`;
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     }else if(name==='照片'||name==='相机'){
