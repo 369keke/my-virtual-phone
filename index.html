@@ -460,8 +460,17 @@
         <div class="wx-list">
           ${data.contacts.map(c=>`
             <button class="wx-contact" data-id="${c.id}">
-              <div class="wx-avatar" style="display:grid;place-items:center;font-size:28px">${esc(c.avatar||'🙂')}</div>
-              <div><strong>${esc(c.name)}</strong><div style="color:#999;font-size:12px">点击进入聊天</div></div>
+              <div class="wx-avatar" style="display:grid;place-items:center;font-size:28px">
+  ${c.avatar&&c.avatar.startsWith('data:image')
+    ? `<img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:10px">`
+    : esc(c.avatar||'🙂')}
+</div>
+              <div>
+  <strong>${esc(c.remark||c.name)}</strong>
+  <div style="color:#999;font-size:12px">
+    ${esc(c.name)} · 点击进入聊天
+  </div>
+</div>
             </button>`).join('')}
           ${data.contacts.length?'':'<div class="wx-empty">还没有联系人，点击右上角添加</div>'}
         </div>
@@ -471,7 +480,14 @@
       const n=prompt('请输入联系人昵称');
       if(!n||!n.trim())return;
       const a=prompt('请输入头像表情，例如 🌸、🐱、🙂','🙂')||'🙂';
-      data.contacts.push({id:Date.now(),name:n.trim(),avatar:a,messages:[]});
+      const r=prompt('请输入联系人备注（可以留空）','')||'';
+data.contacts.push({
+  id:Date.now(),
+  name:n.trim(),
+  avatar:a,
+  remark:r,
+  messages:[]
+});
       save();showList();
     };
 
