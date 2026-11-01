@@ -1,0 +1,21 @@
+{
+  "id": "./",
+  "name": "微信模拟器",
+  "short_name": "微信模拟器",
+  "description": "个人微信聊天模拟器",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ededed",
+  "theme_color": "#ededed",
+  "icons": [
+    {
+      "src": "./app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
