@@ -117,7 +117,7 @@ function renderXhsFeed(){
  const cards=xhsData.posts.map(p=>{
   const src=(p.images&&p.images[0])||p.image||'';
   const image=src?'<img class="xhs-card-image" src="'+src+'" alt="">':'<div class="xhs-card-image xhs-placeholder">点击添加图片</div>';
-  return '<article class="xhs-card" data-xpost="'+p.id+'">'+image+'<div class="xhs-card-copy"><div class="xhs-card-title">'+esc(p.title||'填写笔记标题')+'</div><div class="xhs-card-text">'+esc(p.text||'填写正文内容…')+'</div><div class="xhs-card-tags">'+esc(p.topics||'# 添加蓝色话题')+'</div><div class="xhs-card-author"><img src="'+xhsAvatarSrc()+'"><span>'+esc(xhsData.profile.name||'momo')+'</span><small>'+esc(p.date||'设置时间')+' · '+esc(p.ip||'北京')+'</small></div></div><button class="xhs-card-edit" type="button" data-xedit="'+p.id+'">编辑</button></article>';
+  return '<article class="xhs-card" data-xpost="'+p.id+'">'+image+'<div class="xhs-card-copy"><div class="xhs-card-title">'+esc(p.title||'填写笔记标题')+'</div><div class="xhs-card-text">'+esc(p.text||'填写正文内容…')+'</div><div class="xhs-card-tags">'+esc(p.topics||'# 添加蓝色话题')+'</div><div class="xhs-card-author"><img src="'+(p.avatar||xhsDefaultAvatarSrc())+'"><span>'+esc(p.authorName||xhsData.profile.name||'momo')+'</span><small>'+esc(p.date||'设置时间')+' · '+esc(p.ip||'北京')+'</small></div></div><button class="xhs-card-edit" type="button" data-xedit="'+p.id+'">编辑</button></article>';
  }).join('');
  const templates='';
  box.innerHTML=cards+templates;
