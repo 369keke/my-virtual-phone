@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "微信模拟器",
+  "name": "小手机 V2",
   "short_name": "微信模拟器",
-  "description": "个人微信聊天模拟器",
+  "description": "微信与小红书模拟器",
   "lang": "zh-CN",
   "start_url": "./",
   "scope": "./",
