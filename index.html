@@ -306,6 +306,79 @@
   color:#999;
   padding:35px 10px;
 }
+  /* 微信首页仿真样式 */
+.wx-page {
+  background:#ededed;
+  border-radius:0;
+  color:#111;
+}
+
+.wx-toolbar {
+  min-height:60px;
+  align-items:center;
+  padding:10px 16px;
+  background:#ededed;
+}
+
+.wx-toolbar strong {
+  font-size:21px;
+  text-align:center;
+}
+
+.wx-toolbar button {
+  background:transparent;
+  color:#222;
+  font-size:20px;
+  padding:6px 10px;
+}
+
+.wx-list {
+  background:#fff;
+}
+
+.wx-contact {
+  min-height:82px;
+  padding:12px 16px;
+  gap:13px;
+  border-bottom:1px solid #eee;
+}
+
+.wx-avatar {
+  width:54px;
+  height:54px;
+  border-radius:7px;
+  flex-shrink:0;
+}
+
+.wx-contact strong {
+  font-size:17px;
+  font-weight:500;
+}
+
+.wx-contact .wx-preview {
+  color:#999;
+  font-size:13px;
+  margin-top:6px;
+  max-width:220px;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+
+.wx-bottom {
+  display:flex;
+  justify-content:space-around;
+  padding:12px 0;
+  background:#f8f8f8;
+  border-top:1px solid #ddd;
+}
+
+.wx-bottom button {
+  background:transparent;
+  color:#666;
+  font-size:13px;
+  padding:5px;
+}
     </style>
     </head>
     <body>
@@ -454,9 +527,10 @@
     body.innerHTML=`
       <div class="wx-page">
         <div class="wx-toolbar">
-          <strong style="flex:1;padding:8px">微信</strong>
-          <button id="addWx">＋ 添加联系人</button>
-        </div>
+  <strong style="flex:1;padding:8px">微信</strong>
+  <button id="searchWx">⌕</button>
+  <button id="addWx">＋</button>
+</div>
         <div class="wx-list">
           ${data.contacts.map(c=>`
             <button class="wx-contact" data-id="${c.id}">
@@ -473,6 +547,12 @@
 </div>
             </button>`).join('')}
           ${data.contacts.length?'':'<div class="wx-empty">还没有联系人，点击右上角添加</div>'}
+          <div class="wx-bottom">
+  <button id="tabWechat">💬<br>微信</button>
+  <button id="tabContacts">👥<br>通讯录</button>
+  <button id="tabDiscover">◎<br>发现</button>
+  <button id="tabMe">♙<br>我</button>
+</div>
         </div>
       </div>`;
 
