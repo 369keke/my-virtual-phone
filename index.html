@@ -20,7 +20,7 @@
 .xhs-top button.active:after{content:'';position:absolute;bottom:0;left:35%;width:30%;height:3px;border-radius:3px;background:#ff2442}
 .xhs-cats{display:flex;overflow:auto;white-space:nowrap;background:#fff;border-bottom:1px solid #eee;flex-shrink:0}
 .xhs-cats button:first-child{color:#222;font-weight:600}
-.xhs-feed{overflow-y:auto;overflow-x:hidden;flex:1;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;align-items:start;gap:9px;padding:9px;background:#f7f7f7;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}.xhs-feed-column{display:flex;flex-direction:column;gap:9px;min-width:0}
+.xhs-feed{overflow-y:auto;overflow-x:hidden;flex:1;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;align-items:start;gap:9px;padding:9px;background:#f7f7f7;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}.xhs-feed-column{display:flex;flex-direction:column;align-items:stretch;gap:9px;min-width:0;width:100%}.xhs-feed-column{display:flex;flex-direction:column;gap:9px;min-width:0}
 .xhs-feed .xhs-card{display:block;width:100%;background:#fff;border-radius:9px;margin:0;overflow:hidden;position:relative;min-width:0;box-shadow:0 1px 4px #0000000a}
 .xhs-feed .xhs-card-head{display:none}
 .xhs-feed .xhs-card-head img{width:36px;height:36px;border-radius:50%;object-fit:cover;background:#eee}
@@ -115,13 +115,13 @@ function renderXhsFeed(){
  const now=new Date().toLocaleDateString('zh-CN');const defaults=[{id:'template-note-1',title:'点击这里编辑标题',text:'点击编辑正文内容，写下你想分享的故事。',topics:'# 添加蓝色话题标签',date:now,ip:'北京',image:'',images:[],views:0,likes:77,collectCount:8,commentTarget:2,comments:[{name:'用户甲',text:'这条笔记写得不错！',date:'刚刚',likes:3,avatar:'',replies:[]},{name:'用户乙',text:'来啦，支持一下。',date:'刚刚',likes:1,avatar:'',replies:[]}],visibility:'public'},{id:'template-note-2',title:'点击修改第二条笔记标题',text:'这里是默认正文，点进去可以自由编辑。',topics:'# 日常分享 # 随手记录',date:now,ip:'上海',image:'',images:[],views:0,likes:24,collectCount:5,commentTarget:1,comments:[{name:'用户丙',text:'可以自己改成想要的评论。',date:'刚刚',likes:2,avatar:'',replies:[]}],visibility:'public'},{id:'template-note-3',title:'我的生活碎片',text:'点击这条模板，换成自己的图片和文字。',topics:'# 生活记录',date:now,ip:'广东',image:'',images:[],views:0,likes:12,collectCount:2,commentTarget:1,comments:[{name:'用户丁',text:'蹲一个后续！',date:'刚刚',likes:0,avatar:'',replies:[]}],visibility:'public'} ];defaults.forEach(t=>{if(!xhsData.posts.some(p=>p.id===t.id))xhsData.posts.push(t)});saveXhs();
  const box=$('xhsFeed');box.innerHTML='';
  const cols=[document.createElement('div'),document.createElement('div')];cols.forEach(c=>{c.className='xhs-feed-column';box.appendChild(c)});
- xhsData.posts.forEach(p=>{
+ xhsData.posts.forEach((p,index)=>{
   const src=(p.images&&p.images[0])||p.image||'';
-  const image=src?'<img class="xhs-card-image" src="'+src+'" alt="" loading="lazy">':'<div class="xhs-card-image xhs-placeholder">“'+esc(p.title||p.text||'记录生活中的小事')+'”</div>';
-  const holder=document.createElement('div');holder.innerHTML='<article class="xhs-card" data-xpost="'+p.id+'">'+image+'<div class="xhs-card-copy"><div class="xhs-card-title">'+esc(p.title||'填写笔记标题')+'</div><div class="xhs-card-text">'+esc(p.text||'填写正文内容…')+'</div><div class="xhs-card-tags">'+esc(p.topics||'# 添加蓝色话题')+'</div><div class="xhs-card-author"><img src="'+(p.avatar||xhsAvatarSrc())+'"><span>'+esc(p.authorName||xhsData.profile.name||'momo')+'</span><small>♡ '+(Number(p.likes)||0)+'</small></div></div></article>';
-  const card=holder.firstElementChild;
-  const target=cols[0].offsetHeight<=cols[1].offsetHeight?cols[0]:cols[1];target.appendChild(card);
-  card.onclick=()=>openXhsPost(p.id,true);
+  const title=(p.title||'').trim(),body=(p.text||'').trim(),topics=(p.topics||'').trim();
+  const image=src?'<img class="xhs-card-image" src="'+src+'" alt="" loading="lazy">':'';
+  const copy=(title?'<div class="xhs-card-title">'+esc(title)+'</div>':'')+(body?'<div class="xhs-card-text">'+esc(body)+'</div>':'')+(topics?'<div class="xhs-card-tags">'+esc(topics)+'</div>':'');
+  const holder=document.createElement('div');holder.innerHTML='<article class="xhs-card" data-xpost="'+p.id+'">'+image+(copy||true?'<div class="xhs-card-copy">'+copy+'<div class="xhs-card-author"><img src="'+(p.avatar||xhsAvatarSrc())+'"><span>'+esc(p.authorName||xhsData.profile.name||'momo')+'</span><small>♡ '+(Number(p.likes)||0)+'</small></div></div>':'')+'</article>';
+  const card=holder.firstElementChild;cols[index%2].appendChild(card);card.onclick=()=>openXhsPost(p.id,true);
  });
 }
 function renderXhsProfile(){const p=xhsData.profile;$('xhsProfileName').textContent=p.name||'momo';$('xhsProfileId').textContent='小红书号：'+(p.id||'未设置');$('xhsBio').textContent=p.bio||'';$('xhsProfileAvatar').src=xhsAvatarSrc();$('xhsProfileHero').style.backgroundImage=p.background?'linear-gradient(#0005,#0005),url("'+p.background+'")':'';$('xhsFollowing').textContent=p.following||0;$('xhsFans').textContent=p.fans||0;$('xhsProfileLikes').textContent=p.likes||0;$('xhsMyPosts').innerHTML=xhsData.posts.length?xhsData.posts.map(p=>'<article class="xhs-card xhs-profile-post" data-xpost="'+p.id+'"><img src="'+((p.images&&p.images[0])||p.image||'')+'"><div class="xhs-card-title">'+esc(p.title||p.text||'无标题')+'</div><button type="button" class="xhs-profile-delete" data-xdelete="'+p.id+'">删除</button></article>').join(''):'<div class="xhs-post-empty">还没有发布笔记</div>';$('xhsMyPosts').querySelectorAll('[data-xpost]').forEach(el=>el.onclick=()=>openXhsPost(el.dataset.xpost,true));$('xhsMyPosts').querySelectorAll('[data-xdelete]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();deleteXhsPost(btn.dataset.xdelete)})}
