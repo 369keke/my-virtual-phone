@@ -118,11 +118,11 @@ function renderXhsFeed(){
   const image=src?'<img class="xhs-card-image" src="'+src+'" alt="">':'<div class="xhs-card-image xhs-placeholder">点击添加图片</div>';
   return '<article class="xhs-card" data-xpost="'+p.id+'">'+image+'<div class="xhs-card-copy"><div class="xhs-card-title">'+esc(p.title||'填写笔记标题')+'</div><div class="xhs-card-text">'+esc(p.text||'填写正文内容…')+'</div><div class="xhs-card-tags">'+esc(p.topics||'# 添加蓝色话题')+'</div><div class="xhs-card-author"><img src="'+xhsAvatarSrc()+'"><span>'+esc(xhsData.profile.name||'momo')+'</span><small>'+esc(p.date||'设置时间')+' · '+esc(p.ip||'北京')+'</small></div></div><button class="xhs-card-edit" type="button" data-xedit="'+p.id+'">编辑</button></article>';
  }).join('');
- const templates='<article class="xhs-card xhs-template-card" data-newtemplate="1"><div class="xhs-card-image xhs-placeholder">点击这里添加图片</div><div class="xhs-card-copy"><div class="xhs-card-title">点击填写笔记标题</div><div class="xhs-card-text">点击编辑正文内容…</div><div class="xhs-card-tags"># 添加话题标签</div><div class="xhs-card-author"><img src="'+xhsAvatarSrc()+'"><span>'+esc(xhsData.profile.name||'momo')+'</span><small>时间 · 北京</small></div></div><button class="xhs-card-edit" type="button">编辑模板</button></article>';
+ const templates='';
  box.innerHTML=cards+templates;
  box.querySelectorAll('[data-xpost]').forEach(el=>el.onclick=()=>openXhsPost(el.dataset.xpost,true));
  box.querySelectorAll('[data-xedit]').forEach(el=>el.onclick=e=>{e.stopPropagation();openXhsPost(el.dataset.xedit,true);editXhsPost(el.dataset.xedit)});
- box.querySelectorAll('[data-newtemplate]').forEach(el=>el.onclick=()=>publishXhs());
+
 }
 function renderXhsProfile(){const p=xhsData.profile;$('xhsProfileName').textContent=p.name||'momo';$('xhsProfileId').textContent='小红书号：'+(p.id||'未设置');$('xhsBio').textContent=p.bio||'';$('xhsProfileAvatar').src=xhsAvatarSrc();$('xhsProfileHero').style.backgroundImage=p.background?'linear-gradient(#0005,#0005),url("'+p.background+'")':'';$('xhsFollowing').textContent=p.following||0;$('xhsFans').textContent=p.fans||0;$('xhsProfileLikes').textContent=p.likes||0;$('xhsMyPosts').innerHTML=xhsData.posts.length?xhsData.posts.map(p=>'<article class="xhs-card" data-xpost="'+p.id+'"><img src="'+((p.images&&p.images[0])||p.image||'')+'"><div class="xhs-card-title">'+esc(p.title||p.text||'无标题')+'</div></article>').join(''):'<div class="xhs-post-empty">还没有发布笔记</div>';$('xhsMyPosts').querySelectorAll('[data-xpost]').forEach(el=>el.onclick=()=>openXhsPost(el.dataset.xpost,true))}
 let xhsCreateMode='own',xhsCreatePreviewUrls=[];
