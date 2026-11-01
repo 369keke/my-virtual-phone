@@ -379,6 +379,23 @@
   font-size:13px;
   padding:5px;
 }
+  .wx-msg-avatar {
+  width:40px;
+  height:40px;
+  flex-shrink:0;
+  border-radius:5px;
+  overflow:hidden;
+  background:white;
+  display:grid;
+  place-items:center;
+  font-size:25px;
+}
+
+.wx-msg-avatar img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  }
     </style>
     </head>
     <body>
@@ -580,6 +597,8 @@ data.contacts.push({
     current=id;
     const c=data.contacts.find(x=>x.id===id);
     if(!c)return showList();
+    if(!data.myAvatar)data.myAvatar='🙂';
+if(!c.avatar)c.avatar='🙂';
 
     body.innerHTML=`
       <div class="wx-page">
@@ -593,6 +612,11 @@ data.contacts.push({
           <div class="wx-messages" id="wxMessages">
             ${c.messages.map(m=>`
               <div class="wx-message ${m.mine?'mine':''}">
+  <div class="wx-msg-avatar">
+    ${(m.mine?data.myAvatar:c.avatar).startsWith('data:image')
+      ? `<img src="${m.mine?data.myAvatar:c.avatar}">`
+      : esc(m.mine?data.myAvatar:c.avatar)}
+  </div>
                 <div class="wx-bubble">
                   ${m.image?`<img src="${m.image}" style="max-width:180px;border-radius:8px">`:esc(m.text||'')}
                   <div style="font-size:10px;color:#888;margin-top:5px">${esc(m.time||'')}</div>
