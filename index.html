@@ -396,6 +396,134 @@
   height:100%;
   object-fit:cover;
   }
+  /* 微信聊天界面 */
+.wx-chat-page {
+  background:#ededed;
+  border-radius:0;
+}
+
+.wx-chat-page .wx-chat {
+  background:#ededed;
+}
+
+.wx-chat-head {
+  min-height:52px;
+  justify-content:space-between;
+  border-bottom:1px solid #ddd;
+}
+
+.wx-chat-head strong {
+  font-size:18px;
+}
+
+.wx-chat-head button {
+  background:transparent;
+  color:#222;
+}
+
+.wx-messages {
+  background:#ededed;
+  padding:12px 10px;
+}
+
+.wx-message {
+  max-width:95%;
+  align-items:flex-start;
+  margin-bottom:12px;
+}
+
+.wx-message.mine {
+  flex-direction:row-reverse;
+}
+
+.wx-msg-avatar {
+  width:42px;
+  height:42px;
+  flex-shrink:0;
+  border-radius:5px;
+  overflow:hidden;
+  background:white;
+  display:grid;
+  place-items:center;
+  font-size:25px;
+}
+
+.wx-msg-avatar img,
+.wx-real-avatar {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.wx-bubble {
+  padding:11px 13px;
+  border-radius:5px;
+  background:white;
+  font-size:16px;
+  line-height:1.6;
+  color:#222;
+  max-width:75%;
+}
+
+.wx-message.mine .wx-bubble {
+  background:#95ec69;
+}
+
+.wx-time {
+  text-align:center;
+  color:#999;
+  font-size:12px;
+  margin:15px 0;
+}
+
+.wx-chat-image {
+  max-width:190px;
+  max-height:220px;
+  object-fit:contain;
+  border-radius:5px;
+  display:block;
+}
+
+.wx-message-tools {
+  font-size:11px;
+  margin-top:6px;
+}
+
+.wx-message-tools button {
+  background:transparent;
+  color:#888;
+  padding:3px;
+}
+
+.wx-input-area {
+  background:#f7f7f7;
+  border-top:1px solid #ddd;
+  align-items:center;
+}
+
+.wx-input-area button {
+  background:transparent;
+  color:#333;
+  font-size:19px;
+}
+
+.wx-input-area input {
+  min-height:43px;
+  font-size:15px;
+}
+
+.wx-extra {
+  display:flex;
+  justify-content:space-around;
+  padding:6px;
+  background:#f7f7f7;
+}
+
+.wx-extra button {
+  background:transparent;
+  color:#777;
+  font-size:12px;
+}
     </style>
     </head>
     <body>
@@ -539,179 +667,277 @@
   const save=()=>localStorage.setItem(key,JSON.stringify(data));
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-  function showList(){
-    current=null;
-    body.innerHTML=`
-      <div class="wx-page">
-        <div class="wx-toolbar">
-  <strong style="flex:1;padding:8px">微信</strong>
-  <button id="searchWx">⌕</button>
-  <button id="addWx">＋</button>
-</div>
-        <div class="wx-list">
-          ${data.contacts.map(c=>`
-            <button class="wx-contact" data-id="${c.id}">
-              <div class="wx-avatar" style="display:grid;place-items:center;font-size:28px">
-  ${c.avatar&&c.avatar.startsWith('data:image')
-    ? `<img src="${c.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:10px">`
-    : esc(c.avatar||'🙂')}
-</div>
-              <div>
-  <strong>${esc(c.remark||c.name)}</strong>
-  <div style="color:#999;font-size:12px">
-    ${esc(c.name)} · 点击进入聊天
-  </div>
-</div>
-            </button>`).join('')}
-          ${data.contacts.length?'':'<div class="wx-empty">还没有联系人，点击右上角添加</div>'}
-          <div class="wx-bottom">
-  <button id="tabWechat">💬<br>微信</button>
-  <button id="tabContacts">👥<br>通讯录</button>
-  <button id="tabDiscover">◎<br>发现</button>
-  <button id="tabMe">♙<br>我</button>
-</div>
+  function showChat(id){
+  current=id;
+
+  const c=data.contacts.find(x=>x.id===id);
+  if(!c)return showList();
+
+  if(!data.myAvatar)data.myAvatar='🙂';
+  if(!c.avatar)c.avatar='🙂';
+  if(!c.messages)c.messages=[];
+
+  let screenshot=false;
+  let mine=true;
+
+  const avatarHTML=(avatar)=>{
+    if(avatar&&avatar.startsWith('data:image')){
+      return `<img src="${avatar}" class="wx-real-avatar">`;
+    }
+    return `<span>${esc(avatar||'🙂')}</span>`;
+  };
+
+  body.innerHTML=`
+    <div class="wx-page wx-chat-page">
+
+      <div class="wx-chat">
+
+        <div class="wx-chat-head">
+          <button id="backWx">‹</button>
+          <strong>${esc(c.name)}</strong>
+          <button id="changeContactAvatar">更换对方头像</button>
+          <button id="editWx">···</button>
         </div>
-      </div>`;
 
-    body.querySelector('#addWx').onclick=()=>{
-      const n=prompt('请输入联系人昵称');
-      if(!n||!n.trim())return;
-      const a=prompt('请输入头像表情，例如 🌸、🐱、🙂','🙂')||'🙂';
-      const r=prompt('请输入联系人备注（可以留空）','')||'';
-data.contacts.push({
-  id:Date.now(),
-  name:n.trim(),
-  avatar:a,
-  remark:r,
-  messages:[]
-});
-      save();showList();
-    };
+        <div class="wx-messages" id="wxMessages">
 
-    body.querySelectorAll('[data-id]').forEach(b=>{
-      b.onclick=()=>showChat(Number(b.dataset.id));
-    });
+          ${c.messages.map(m=>`
+            <div class="wx-time">${esc(m.time||'')}</div>
+
+            <div class="wx-message ${m.mine?'mine':''}">
+
+              <div class="wx-msg-avatar">
+                ${avatarHTML(m.mine?data.myAvatar:c.avatar)}
+              </div>
+
+              <div class="wx-bubble">
+
+                ${m.image
+                  ? `<img src="${m.image}" class="wx-chat-image">`
+                  : esc(m.text||'')}
+
+                <div class="wx-message-tools">
+                  <button data-edit="${m.id}">编辑</button>
+                  <button data-del="${m.id}">删除</button>
+                </div>
+
+              </div>
+            </div>
+          `).join('')}
+
+        </div>
+
+        <div class="wx-input-area" id="wxInputArea">
+
+          <button id="voiceWx">◉</button>
+
+          <input id="wxInput" placeholder="输入消息……">
+
+          <button id="emojiWx">☺</button>
+
+          <button id="imageWx">＋</button>
+
+          <button id="sendWx">发送</button>
+
+        </div>
+
+        <div class="wx-extra">
+          <button id="myAvatarWx">更换我的头像</button>
+          <button id="sideWx">切换发送方</button>
+          <button id="shotWx">截图模式</button>
+        </div>
+
+        <input id="wxFile" type="file" accept="image/*" hidden>
+        <input id="contactAvatarFile" type="file" accept="image/*" hidden>
+        <input id="myAvatarFile" type="file" accept="image/*" hidden>
+
+      </div>
+    </div>
+  `;
+
+  const messages=body.querySelector('#wxMessages');
+
+  messages.scrollTop=messages.scrollHeight;
+
+  function saveAndRefresh(){
+    save();
+    showChat(id);
   }
 
-  function showChat(id){
-    current=id;
-    const c=data.contacts.find(x=>x.id===id);
-    if(!c)return showList();
-    if(!data.myAvatar)data.myAvatar='🙂';
-if(!c.avatar)c.avatar='🙂';
+  // 返回聊天首页
+  body.querySelector('#backWx').onclick=showList;
 
-    body.innerHTML=`
-      <div class="wx-page">
-        <div class="wx-chat">
-          <div class="wx-chat-head">
-            <button id="backWx">‹</button>
-            <strong style="flex:1">${esc(c.name)}</strong>
-            <button id="editWx">编辑联系人</button>
-            <button id="shotWx">截图模式</button>
-          </div>
-          <div class="wx-messages" id="wxMessages">
-            ${c.messages.map(m=>`
-              <div class="wx-message ${m.mine?'mine':''}">
-  <div class="wx-msg-avatar">
-    ${(m.mine?data.myAvatar:c.avatar).startsWith('data:image')
-      ? `<img src="${m.mine?data.myAvatar:c.avatar}">`
-      : esc(m.mine?data.myAvatar:c.avatar)}
-  </div>
-                <div class="wx-bubble">
-                  ${m.image?`<img src="${m.image}" style="max-width:180px;border-radius:8px">`:esc(m.text||'')}
-                  <div style="font-size:10px;color:#888;margin-top:5px">${esc(m.time||'')}</div>
-                  <div style="font-size:11px;margin-top:5px">
-                    <button data-edit="${m.id}">编辑</button>
-                    <button data-del="${m.id}">删除</button>
-                  </div>
-                </div>
-              </div>`).join('')}
-          </div>
-          <div class="wx-input-area">
-            <button id="sideWx">切换发送方</button>
-            <input id="wxInput" placeholder="输入消息……">
-            <button id="sendWx">发送</button>
-            <button id="imageWx">图片</button>
-            <input id="wxFile" type="file" accept="image/*" hidden>
-          </div>
-        </div>
-      </div>`;
+  // 更换对方头像
+  body.querySelector('#changeContactAvatar').onclick=()=>{
+    body.querySelector('#contactAvatarFile').click();
+  };
 
-    const messages=body.querySelector('#wxMessages');
-    messages.scrollTop=messages.scrollHeight;
+  body.querySelector('#contactAvatarFile').onchange=e=>{
+    const file=e.target.files[0];
+    if(!file)return;
 
-    body.querySelector('#backWx').onclick=showList;
+    const reader=new FileReader();
 
-    body.querySelector('#editWx').onclick=()=>{
-      const n=prompt('修改联系人昵称',c.name);
-      if(n&&n.trim())c.name=n.trim();
-      const a=prompt('修改头像表情',c.avatar||'🙂');
-      if(a)c.avatar=a;
-      save();showChat(id);
+    reader.onload=()=>{
+      c.avatar=reader.result;
+      saveAndRefresh();
     };
 
-    body.querySelector('#shotWx').onclick=()=>{
-      screenshot=!screenshot;
-      body.querySelectorAll('.wx-message button').forEach(b=>{
-        b.style.display=screenshot?'none':'';
-      });
-      body.querySelector('.wx-input-area').style.display=screenshot?'none':'flex';
+    reader.readAsDataURL(file);
+  };
+
+  // 更换自己的头像
+  body.querySelector('#myAvatarWx').onclick=()=>{
+    body.querySelector('#myAvatarFile').click();
+  };
+
+  body.querySelector('#myAvatarFile').onchange=e=>{
+    const file=e.target.files[0];
+    if(!file)return;
+
+    const reader=new FileReader();
+
+    reader.onload=()=>{
+      data.myAvatar=reader.result;
+      saveAndRefresh();
     };
 
-    let mine=true;
-    body.querySelector('#sideWx').onclick=()=>{
-      mine=!mine;
-      body.querySelector('#sideWx').textContent=mine?'自己发送':'对方发送';
-    };
+    reader.readAsDataURL(file);
+  };
 
-    function addMessage(text,image=''){
-      if(!text&&!image)return;
-      c.messages.push({
-        id:Date.now()+Math.random(),
-        mine,text,image,
-        time:new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})
-      });
-      save();showChat(id);
+  // 联系人设置
+  body.querySelector('#editWx').onclick=()=>{
+    const n=prompt('修改联系人昵称',c.name);
+
+    if(n&&n.trim())c.name=n.trim();
+
+    const r=prompt('修改联系人备注',c.remark||'');
+
+    if(r!==null)c.remark=r;
+
+    saveAndRefresh();
+  };
+
+  // 截图模式
+  body.querySelector('#shotWx').onclick=()=>{
+    screenshot=!screenshot;
+
+    body.querySelectorAll('.wx-message-tools').forEach(x=>{
+      x.style.display=screenshot?'none':'';
+    });
+
+    body.querySelector('#wxInputArea').style.display=
+      screenshot?'none':'flex';
+
+    body.querySelector('.wx-extra').style.display=
+      screenshot?'none':'flex';
+  };
+
+  // 切换发送方
+  body.querySelector('#sideWx').onclick=()=>{
+    mine=!mine;
+
+    body.querySelector('#sideWx').textContent=
+      mine?'自己发送':'对方发送';
+  };
+
+  // 添加消息
+  function addMessage(text,image=''){
+    if(!text&&!image)return;
+
+    c.messages.push({
+      id:Date.now()+Math.random(),
+      mine,
+      text,
+      image,
+      time:new Date().toLocaleTimeString('zh-CN',{
+        hour:'2-digit',
+        minute:'2-digit'
+      })
+    });
+
+    saveAndRefresh();
+  }
+
+  // 发送文字
+  body.querySelector('#sendWx').onclick=()=>{
+    const input=body.querySelector('#wxInput');
+    addMessage(input.value.trim());
+  };
+
+  body.querySelector('#wxInput').onkeydown=e=>{
+    if(e.key==='Enter'){
+      body.querySelector('#sendWx').click();
     }
+  };
 
-    body.querySelector('#sendWx').onclick=()=>{
-      addMessage(body.querySelector('#wxInput').value.trim());
+  // 表情
+  body.querySelector('#emojiWx').onclick=()=>{
+    const emoji=prompt('输入一个表情，例如 😊 ❤️ 🐱');
+    if(emoji)addMessage(emoji);
+  };
+
+  // 图片消息
+  body.querySelector('#imageWx').onclick=()=>{
+    body.querySelector('#wxFile').click();
+  };
+
+  body.querySelector('#wxFile').onchange=e=>{
+    const file=e.target.files[0];
+    if(!file)return;
+
+    const reader=new FileReader();
+
+    reader.onload=()=>{
+      addMessage('',reader.result);
     };
 
-    body.querySelector('#wxInput').onkeydown=e=>{
-      if(e.key==='Enter')body.querySelector('#sendWx').click();
+    reader.readAsDataURL(file);
+  };
+
+  // 语音按钮演示
+  body.querySelector('#voiceWx').onclick=()=>{
+    alert('语音功能目前为界面演示，暂不支持真实录音。');
+  };
+
+  // 编辑消息
+  body.querySelectorAll('[data-edit]').forEach(b=>{
+    b.onclick=()=>{
+      const m=c.messages.find(
+        x=>String(x.id)===b.dataset.edit
+      );
+
+      if(!m)return;
+
+      const t=prompt('修改消息内容',m.text||'');
+
+      if(t===null)return;
+
+      m.text=t;
+
+      const time=prompt(
+        '修改消息时间，例如 09:30',
+        m.time||''
+      );
+
+      if(time!==null)m.time=time;
+
+      saveAndRefresh();
     };
+  });
 
-    body.querySelector('#imageWx').onclick=()=>body.querySelector('#wxFile').click();
+  // 删除消息
+  body.querySelectorAll('[data-del]').forEach(b=>{
+    b.onclick=()=>{
+      if(!confirm('确定删除这条消息吗？'))return;
 
-    body.querySelector('#wxFile').onchange=e=>{
-      const file=e.target.files[0];
-      if(!file)return;
-      const reader=new FileReader();
-      reader.onload=()=>addMessage('',reader.result);
-      reader.readAsDataURL(file);
+      c.messages=c.messages.filter(
+        x=>String(x.id)!==b.dataset.del
+      );
+
+      saveAndRefresh();
     };
-
-    body.querySelectorAll('[data-edit]').forEach(b=>{
-      b.onclick=()=>{
-        const m=c.messages.find(x=>String(x.id)===b.dataset.edit);
-        if(!m)return;
-        const t=prompt('修改消息内容',m.text||'');
-        if(t===null)return;
-        m.text=t;
-        const time=prompt('修改消息时间（例如 09:30）',m.time||'');
-        if(time!==null)m.time=time;
-        save();showChat(id);
-      };
-    });
-
-    body.querySelectorAll('[data-del]').forEach(b=>{
-      b.onclick=()=>{
-        if(!confirm('确定删除这条消息吗？'))return;
-        c.messages=c.messages.filter(x=>String(x.id)!==b.dataset.del);
-        save();showChat(id);
-      };
-    });
+  });
   }
 
   showList();
